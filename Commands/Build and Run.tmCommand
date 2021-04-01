@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env bash
+[[ -f "${TM_SUPPORT_PATH}/lib/bash_init.sh" ]] &amp;&amp; . "${TM_SUPPORT_PATH}/lib/bash_init.sh"
+
+#cd "$TM_DIRECTORY"
+#gnatmake "$TM_FILENAME"
+#if [[ $? == 0 ]]; then
+#  SCRIPT="TM_DIRECTORY=$TM_DIRECTORY"$'\nTM_FILENAME='"$TM_FILENAME"$'\ncd #"$TM_DIRECTORY" &amp;&amp; clear &amp;&amp; "./${TM_FILENAME%.*}" &amp;&amp; exit'
+#  osascript &lt;&lt;APPLESCRIPT
+#    tell app "Terminal"
+#      activate
+#      do script "${SCRIPT//\"/\"}"
+#    end tell
+#APPLESCRIPT
+#fi
+
+. "$TM_SUPPORT_PATH/lib/webpreview.sh"
+html_header "Compiling “${TM_FILENAME}”…"
+
+cd "$TM_DIRECTORY"
+"${TM_GNATMAKE:-gnatmake}"gnatmake "$TM_FILENAME" &amp;&gt; &gt;(ruby -rtm_parser -eTextMate.parse_errors)
+if (($? &gt;= 1)); then exit; fi
+
+{ "./${TM_FILENAME%.adb}"
+  echo -e "\nProgram exited with status $?."; }|pre
+
+# # if you want to run the program in Terminal.app
+# osascript &lt;&lt;EOF
+#    tell application "Terminal"
+#       activate
+#       do script "cd '$TM_DIRECTORY'; java '${TM_FILENAME%.java}'"
+#    end tell
+# EOF
+
+html_footer
+</string>
+	<key>input</key>
+	<string>selection</string>
+	<key>inputFormat</key>
+	<string>text</string>
+	<key>keyEquivalent</key>
+	<string>@r</string>
+	<key>name</key>
+	<string>Build and Run</string>
+	<key>outputCaret</key>
+	<string>afterOutput</string>
+	<key>outputFormat</key>
+	<string>html</string>
+	<key>outputLocation</key>
+	<string>newWindow</string>
+	<key>requiredCommands</key>
+	<array>
+		<dict>
+			<key>command</key>
+			<string>gnatmake</string>
+			<key>locations</key>
+			<array>
+				<string>/usr/local/ada-4.2/bin/gnatmake</string>
+				<string>/usr/local/ada-4.3/bin/gnatmake</string>
+			</array>
+			<key>variable</key>
+			<string>TM_GNATMAKE</string>
+		</dict>
+	</array>
+	<key>scope</key>
+	<string>source.app</string>
+	<key>uuid</key>
+	<string>97B21BF7-073D-4070-850C-DD8761B18DBC</string>
+	<key>version</key>
+	<integer>2</integer>
+</dict>
+</plist>
